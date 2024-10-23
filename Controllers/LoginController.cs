@@ -3,21 +3,20 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using SysCoco._0.Models;
 using System.Security.Claims;
+using SysCoco._0.Services;
 
 namespace SysCoco._0.Controllers
 {
     public class LoginController : Controller
     {
-        public IActionResult Index()
-        {
         private readonly IUsuarioService _usuarioService;
-        private readonly IFilesService _filesService;
-        private readonly SyCIngenieriaContext _context;
+        private readonly IFilesService _FileService;
+        private readonly syscocoContext _context;
 
-        public LoginController(IUsuarioService usuarioService, IFilesService filesService, SyCIngenieriaContext context)
+        public LoginController(IUsuarioService usuarioService, IFilesService filesService, syscocoContext context)
         {
             _usuarioService = usuarioService;
-            _filesService = filesService;
+            _FileService = filesService;
             _context = context;
         }
 
@@ -34,14 +33,14 @@ namespace SysCoco._0.Controllers
                 return View(usuario);
             }
 
-            if (usuario.FkRol < 1 || usuario.FkRol > 3)
+            if (usuario.rolesid < 1 || usuario.rolesid > 4)
             {
                 ViewData["Mensaje"] = "El rol seleccionado no es válido. Debe ser 1 (Administrador), 2 (Cliente) o 3 (Empresa).";
                 return View(usuario);
             }
 
             Stream image = Imagen.OpenReadStream();
-            string urlImagen = await _filesService.SubirArchivo(image, Imagen.FileName);
+            string urlImagen = await _FileService.SubirArchivo(image, Imagen.FileName);
 
             usuario.Contraseña = Utilidades.EncriptarClave(usuario.Contraseña);
             usuario.fotoPerfil = urlImagen;
@@ -126,6 +125,5 @@ namespace SysCoco._0.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("IniciarSesion", "Login");
         }
-    }
     }
 }
