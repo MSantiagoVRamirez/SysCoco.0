@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Reflection.Emit;
+using SysCoco._0.Models;
 
 namespace SysCoco._0.Models
 {

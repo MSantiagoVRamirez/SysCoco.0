@@ -12,8 +12,8 @@ using SysCoco._0.Models;
 namespace SysCoco._0.Migrations
 {
     [DbContext(typeof(syscocoContext))]
-    [Migration("20241023063656_syscoco")]
-    partial class syscoco
+    [Migration("20241108020402_SySCoco")]
+    partial class SySCoco
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -311,8 +311,10 @@ namespace SysCoco._0.Migrations
                     b.Property<bool>("Estado")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Nombre")
-                        .HasColumnType("int");
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("id");
 

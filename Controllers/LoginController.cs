@@ -1,129 +1,100 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using SysCoco._0.Models;
-using System.Security.Claims;
 using SysCoco._0.Services;
+using System.Security.Claims;
 
 namespace SysCoco._0.Controllers
 {
-    public class LoginController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class LoginController : ControllerBase
     {
-        private readonly IUsuarioService _usuarioService;
-        private readonly IFilesService _FileService;
         private readonly syscocoContext _context;
+        private readonly IUsuarioService _usuarioService;
 
-        public LoginController(IUsuarioService usuarioService, IFilesService filesService, syscocoContext context)
+        public LoginController(syscocoContext context, IUsuarioService usuarioService)
         {
-            _usuarioService = usuarioService;
-            _FileService = filesService;
             _context = context;
+            _usuarioService = usuarioService;
         }
 
-        public IActionResult Registro()
+        // Registro de nuevos usuarios
+        [HttpPost("registro")]
+        public async Task<IActionResult> CrearUsuarios([FromBody] Usuarios usuario)
         {
-            return View();
-        }
-        [HttpPost]
-        public async Task<IActionResult> Registro(Usuarios usuario, IFormFile Imagen)
-        {
-            if (Imagen == null || Imagen.Length == 0)
+            var rolExistente = await _context.Roles.FindAsync(usuario.rolesid); // Aquí debe buscarse por rolesid, no por roles
+            if (rolExistente == null)
             {
-                ViewData["Mensaje"] = "Debe cargar una imagen.";
-                return View(usuario);
+                return BadRequest("El rol especificado no existe.");
             }
 
-            if (usuario.rolesid < 1 || usuario.rolesid > 4)
-            {
-                ViewData["Mensaje"] = "El rol seleccionado no es válido. Debe ser 1 (Administrador), 2 (Cliente) o 3 (Empresa).";
-                return View(usuario);
-            }
+            // Encriptar la contraseña del usuario
+            usuario.contraseña = Utilidades.EncriptarClave(usuario.contraseña);
+            usuario.roles = rolExistente;
 
-            Stream image = Imagen.OpenReadStream();
-            string urlImagen = await _FileService.SubirArchivo(image, Imagen.FileName);
+            _context.Usuarios.Add(usuario);
+            await _context.SaveChangesAsync();
 
-            usuario.Contraseña = Utilidades.EncriptarClave(usuario.Contraseña);
-            usuario.fotoPerfil = urlImagen;
-            usuario.FechaCreacion = DateTime.Now;
-            usuario.FechaExpira = DateTime.Now.AddYears(1);
-
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors);
-                foreach (var error in errors)
-                {
-                    Console.WriteLine(error.ErrorMessage);
-                }
-
-                ViewData["Mensaje"] = "Todos los campos obligatorios deben ser completados correctamente.";
-                return View(usuario);
-            }
-
-            Usuarios usuarioCreado = await _usuarioService.SaveUsuario(usuario);
-
-            if (usuarioCreado.Id > 0)
-            {
-                return View("~/Views/Login/RegistroExitoso.cshtml");
-            }
-
-            ViewData["Mensaje"] = "No se pudo crear el usuario.";
-            return View(usuario);
+            return Ok(usuario);
         }
 
-
-        [HttpGet]
-        public IActionResult IniciarSesion()
+        // Inicio de sesión de usuarios
+        [HttpPost("iniciarSesion")]
+        public async Task<IActionResult> IniciarSesion([FromBody] IniciarSesionRequest request)
         {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> IniciarSesion(string NombreUsuario, string Contraseña)
-        {
-            if (string.IsNullOrEmpty(NombreUsuario) || string.IsNullOrEmpty(Contraseña))
+            if (string.IsNullOrEmpty(request.correo) || string.IsNullOrEmpty(request.contraseña))
             {
-                ViewData["Mensaje"] = "Por favor, complete todos los campos.";
-                return View();
+                return BadRequest("Por favor, complete todos los campos.");
             }
 
-            var usuario = await _usuarioService.GetUsuario(NombreUsuario, Contraseña);
+            // Corregido: coma entre los parámetros
+            var usuario = await _usuarioService.GetUsuario(request.correo, request.contraseña);
 
             if (usuario == null)
             {
-                ViewData["Mensaje"] = "Nombre de usuario o contraseña incorrectos.";
-                return View();
+                return Unauthorized("Nombre de usuario o contraseña incorrectos.");
             }
 
-
-            var nombreRol = await _usuarioService.GetRolNombrePorUsuario(usuario.Id);
+            // Obtener el nombre del rol
+            var nombreRol = await _usuarioService.GetRolNombrePorUsuario(usuario.id);
 
             if (nombreRol == null)
             {
-                ViewData["Mensaje"] = "Error al obtener el rol del usuario.";
-                return View();
+                return StatusCode(500, "Error al obtener el rol del usuario.");
             }
 
+
             var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, usuario.NombreUsuario),
-        new Claim(ClaimTypes.Role, nombreRol),
-        new Claim("fotoPerfil", usuario.fotoPerfil ?? string.Empty)
-    };
+            {
+                new Claim(ClaimTypes.Name, usuario.nombres),
+                new Claim(ClaimTypes.Role, nombreRol),
+            };
+
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-            return RedirectToAction("Index", "Home");
+            return Ok(new { Message = "Inicio de sesión exitoso", usuario });
         }
 
-        [HttpPost("CerrarSesion")]
+        // Cerrar sesión
+        [HttpPost("cerrarSesion")]
         public async Task<IActionResult> CerrarSesion()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("IniciarSesion", "Login");
+            return Ok(new { Message = "Sesión cerrada exitosamente" });
         }
+    }
+
+    // Clase para manejar la solicitud de inicio de sesió
+    public class IniciarSesionRequest
+    {
+        public string correo { get; set; }
+        public string contraseña { get; set; }
     }
 }

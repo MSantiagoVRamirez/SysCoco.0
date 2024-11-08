@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SysCoco._0.Models;
 
 namespace SysCoco._0.Models
 {

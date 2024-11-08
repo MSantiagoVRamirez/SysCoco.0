@@ -1,32 +1,61 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using SysCoco._0.Models;
+using SysCoco._0.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
+
+// Configurar el contexto de base de datos
 builder.Services.AddDbContext<syscocoContext>(options =>
      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-var app = builder.Build();
+// Registrar IHttpContextAccessor para acceder al contexto HTTP
+builder.Services.AddHttpContextAccessor();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// Configurar autenticación basada en cookies
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(options =>
+        {
+            options.LoginPath = "/api/Login/IniciarSesion"; // Ruta para el inicio de sesión
+            options.LogoutPath = "/api/Login/CerrarSesion"; // Ruta para cerrar sesión
+            options.AccessDeniedPath = "/AccesoDenegado"; // Ruta en caso de acceso denegado
+        });
+
+// Registrar el servicio de usuarios
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
+// Agregar Distributed Memory Cache para las sesiones
+builder.Services.AddDistributedMemoryCache();
+
+// Configurar sesiones
+builder.Services.AddSession(options =>
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+    options.IdleTimeout = TimeSpan.FromMinutes(50);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+
+// Construir la aplicación
+var app = builder.Build();  // Esta es la única llamada a Build()
 
 app.UseHttpsRedirection();
+
+// Sirve archivos estáticos como CSS, imágenes, etc. (si aplicable)
 app.UseStaticFiles();
 
-app.UseRouting();
+// Habilitar sesiones
+app.UseSession();
 
-app.UseAuthorization();
+// Habilitar autenticación y autorización
+app.UseAuthentication(); // Primero la autenticación
+app.UseAuthorization();  // Luego la autorización
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+// Habilitar el enrutamiento
+app.MapControllers();
 
+// Ejecutar la aplicación
 app.Run();
