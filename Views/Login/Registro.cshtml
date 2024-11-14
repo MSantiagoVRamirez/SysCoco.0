@@ -1,0 +1,133 @@
+﻿@model SysCoco._0.Models.Usuarios
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuario</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 5rem 0; /* Agregamos espacio arriba y abajo */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: url('@Url.Content("~/img/fuond.jpg")') no-repeat center center fixed;
+            background-size: cover;
+            background-color: #f8f9fa;
+        }
+
+        .form-register {
+            background-color: rgba(91, 151, 72, 0.3); /* Aumentamos la transparencia */
+            padding: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 380px;
+        }
+
+            .form-register h2 {
+                font-size: 1.5rem; /* Aumentamos el tamaño de la fuente del título */
+                font-weight: bold;
+                color: #000; /* Cambiamos el color del título a blanco */
+                margin-bottom: 0.4rem;
+                text-align: center;
+            }
+
+            .form-register .form-group label {
+                font-weight: 500;
+                color: #333;
+                font-size: 0.8rem;
+            }
+
+            .form-register .form-control {
+                font-size: 0.8rem;
+                padding: 0.3rem;
+            }
+
+        .btn-primary {
+            background-color: #5b9748;
+            border-color: #5b9748;
+            font-size: 0.8rem;
+            color: #000;
+            padding: 0.3rem 0.5rem;
+        }
+
+    </style>
+</head>
+<br />
+<br />
+<body>
+    <div class="form-register">
+        <h2>Crear una cuenta</h2>
+    
+            <form asp-action="Register" method="post">
+                <div class="form-group">
+                    <label for="nombres">Nombres</label>
+                    <input asp-for="nombres" class="form-control" placeholder="Nombres" />
+                    <span asp-validation-for="nombres" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="apellidos">Apellidos</label>
+                    <input asp-for="apellidos" class="form-control" placeholder="Apellidos" />
+                    <span asp-validation-for="apellidos" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="tipoDocumento">Tipo de Documento</label>
+                    <input asp-for="tipoDocumento" class="form-control" placeholder="Tipo de Documento" />
+                    <span asp-validation-for="tipoDocumento" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="numeroDocumento">Número de Documento</label>
+                    <input asp-for="numeroDocumento" class="form-control" placeholder="Número de Documento" />
+                    <span asp-validation-for="numeroDocumento" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="contraseña">Contraseña</label>
+                    <input asp-for="contraseña" type="password" class="form-control" placeholder="Contraseña" />
+                    <span asp-validation-for="contraseña" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                    <input asp-for="fechaNacimiento" type="date" class="form-control" />
+                    <span asp-validation-for="fechaNacimiento" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="numeroTelefono">Número de Teléfono</label>
+                    <input asp-for="numeroTelefono" class="form-control" placeholder="Número de Teléfono" />
+                    <span asp-validation-for="numeroTelefono" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="correo">Correo</label>
+                    <input asp-for="correo" type="email" class="form-control" placeholder="Correo" />
+                    <span asp-validation-for="correo" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="rolesid">Rol</label>
+                    <select asp-for="rolesid" class="form-control">
+                        <!-- Aquí podrías agregar opciones de roles, si es dinámico, usa ViewBag o un modelo de lista -->
+                        <option value="">Seleccione un Rol</option>
+                        <option value="1">Administrador</option>
+                        <option value="2">Usuario</option>
+                    </select>
+                    <span asp-validation-for="rolesid" class="text-danger"></span>
+                </div>
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="terms" required>
+                    <label class="form-check-label" for="terms">Acepto los términos y condiciones</label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Crear cuenta</button>
+                <p class="mt-3 text-center">¿Ya tienes una cuenta? <a href="@Url.Action("IniciarSesion", "Login")">Volver</a></p>
+            </form>
+        
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.11/dist/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

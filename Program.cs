@@ -5,8 +5,8 @@ using SysCoco._0.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers();
+// Agregar servicios al contenedor.
+builder.Services.AddControllersWithViews();
 
 // Configurar el contexto de base de datos
 builder.Services.AddDbContext<syscocoContext>(options =>
@@ -19,9 +19,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
         .AddCookie(options =>
         {
-            options.LoginPath = "/api/Login/IniciarSesion"; // Ruta para el inicio de sesión
-            options.LogoutPath = "/api/Login/CerrarSesion"; // Ruta para cerrar sesión
-            options.AccessDeniedPath = "/AccesoDenegado"; // Ruta en caso de acceso denegado
+            options.LoginPath = "/api/Login/IniciarSesion";      // Ruta para el inicio de sesión
+            options.LogoutPath = "/api/Login/CerrarSesion";      // Ruta para cerrar sesión
+            options.AccessDeniedPath = "/AccesoDenegado";        // Ruta en caso de acceso denegado
         });
 
 // Registrar el servicio de usuarios
@@ -38,24 +38,30 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+var app = builder.Build();
 
-// Construir la aplicación
-var app = builder.Build();  // Esta es la única llamada a Build()
+// Configuración del pipeline de solicitudes HTTP.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
-
-// Sirve archivos estáticos como CSS, imágenes, etc. (si aplicable)
 app.UseStaticFiles();
+
+app.UseRouting();
 
 // Habilitar sesiones
 app.UseSession();
 
 // Habilitar autenticación y autorización
-app.UseAuthentication(); // Primero la autenticación
-app.UseAuthorization();  // Luego la autorización
+app.UseAuthentication();
+app.UseAuthorization();
 
-// Habilitar el enrutamiento
-app.MapControllers();
+// Cambia el controlador y acción predeterminados a Login y IniciarSesion
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Login}/{action=IniciarSesion}/{id?}");
 
-// Ejecutar la aplicación
 app.Run();

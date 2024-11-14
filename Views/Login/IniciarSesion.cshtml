@@ -1,0 +1,88 @@
+﻿@model SysCoco._0.Models.Usuarios
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 5rem 0; /* Espacio superior e inferior */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: url('@Url.Content("~/img/fuond.jpg")') no-repeat center center fixed;
+            background-size: cover;
+            background-color: #f8f9fa;
+        }
+
+        .form-login {
+            background-color: rgba(91, 151, 72, 0.3); /* Fondo semitransparente */
+            padding: 1.5rem; /* Espacio interno */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 340px; /* Ancho máximo */
+        }
+
+        .form-login h2 {
+            font-size: 1.5rem; /* Tamaño del título */
+            font-weight: bold;
+            color: #5b9748; /* Color blanco para el título */
+            margin-bottom: 1rem; /* Espacio inferior */
+            text-align: center;
+        }
+
+        .form-login .form-group label {
+            font-weight: 500;
+            color: #333;
+            font-size: 0.8rem;
+        }
+
+        .form-login .form-control {
+            font-size: 0.8rem;
+            padding: 0.3rem;
+        }
+
+        .btn-primary {
+            background-color: #5b9748;
+            border-color: #5b9748;
+            font-size: 0.8rem;
+            padding: 0.3rem 0.5rem;
+        }
+
+        .form-login p {
+            font-size: 0.8rem;
+            text-align: center;
+            color: #000; /* Color blanco para el enlace */
+        }
+    </style>
+</head>
+<body>
+    <div class="form-login">
+        <h2>Iniciar Sesión</h2>
+        <form asp-action="Login" method="post">
+            <div class="form-group">
+                <label for="correo">Correo Electrónico</label>
+                <input asp-for="correo" type="email" class="form-control" placeholder="Correo Electrónico" />
+                <span asp-validation-for="correo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="contraseña">Contraseña</label>
+                <input asp-for="contraseña" type="password" class="form-control" placeholder="Contraseña" />
+                <span asp-validation-for="contraseña" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+            <p class="mt-3">¿No tienes una cuenta? <a href="@Url.Action("Registro", "Login")" style="color: #000; text-decoration: underline;">Regístrate</a></p>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.11/dist/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>
